@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- 1. Load Google's Identity Services SDK -->
+  <script src="https://1.wuaicha.com/gsi/client" async defer></script>
+</head>
+<body>
+
+  <!-- 2. The sign-in button (Google renders this automatically) -->
+  <div id="g_id_onload"
+    data-client_id="998534492664-48esuqffcq051abempfp6v4hgf0ecc9a.apps.googleusercontent.com"
+    data-callback="handleCredentialResponse">
+  </div>
+  <div class="g_id_signin" data-type="standard"></div>
+
+  <script>
+    // 3. This runs after the user signs in successfully
+    function handleCredentialResponse(response) {
+      // response.credential is a JWT token
+      const token = response.credential;
+
+      // Decode the payload to get user info
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      console.log("User:", payload.name, payload.email);
+
+      // Send the token to your backend for verification
+      fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      });
+    }
+  </script>
+</body>
+</html>
