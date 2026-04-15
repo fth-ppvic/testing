@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+
+  <!-- ============================================================
+       REPLACE THIS WITH YOUR GOOGLE CLIENT ID
+       ============================================================ -->
+  <meta name="google-signin-client_id" content="998534492664-52051203949k0ldmapomtkvbghdp31ji.apps.googleusercontent.com">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:     #1a1a2e;
+      --paper:   #f5f0e8;
+      --gold:    #c9a84c;
+      --gold-lt: #e8d5a3;
+      --muted:   #7a7265;
+      --white:   #ffffff;
+      --radius:  14px;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      overflow: hidden;
+    }
+
+    /* ── Animated grain overlay ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.04;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Decorative background circles ── */
+    .bg-circle {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .bg-circle-1 {
+      width: 600px; height: 600px;
+      top: -200px; right: -150px;
+      background: radial-gradient(circle, #c9a84c22 0%, transparent 70%);
+    }
+    .bg-circle-2 {
+      width: 400px; height: 400px;
+      bottom: -100px; left: -100px;
+      background: radial-gradient(circle, #1a1a2e18 0%, transparent 70%);
+    }
+
+    /* ── Page layout ── */
+    .page {
+      position: relative; z-index: 1;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 52px 48px 44px;
+      width: 420px;
+      max-width: 92vw;
+      box-shadow:
+        0 2px 4px rgba(26,26,46,.04),
+        0 8px 24px rgba(26,26,46,.10),
+        0 32px 64px rgba(26,26,46,.08);
+      position: relative;
+      overflow: hidden;
+      animation: cardIn .6s cubic-bezier(.22,1,.36,1) both;
+    }
+    /* gold top bar */
+    .card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-lt), var(--gold));
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(28px) scale(.97); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ── Login view ── */
+    #login-view { text-align: center; }
+
+    .logo-ring {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--gold-lt));
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 28px;
+      font-size: 28px;
+      box-shadow: 0 4px 16px rgba(201,168,76,.35);
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+
+    .subtitle {
+      font-size: .95rem;
+      color: var(--muted);
+      font-weight: 300;
+      margin-bottom: 36px;
+      line-height: 1.5;
+    }
+
+    /* Google sign-in button */
+    .google-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding: 14px 24px;
+      background: var(--ink);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem;
+      font-weight: 500;
+      letter-spacing: .01em;
+      cursor: pointer;
+      transition: background .2s, transform .15s, box-shadow .2s;
+      box-shadow: 0 2px 8px rgba(26,26,46,.18);
+    }
+    .google-btn:hover {
+      background: #2d2d4e;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(26,26,46,.22);
+    }
+    .google-btn:active { transform: none; }
+
+    .google-btn svg { flex-shrink: 0; }
+
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 24px 0;
+      color: var(--muted);
+      font-size: .8rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1;
+      height: 1px; background: #e5e0d8;
+    }
+
+    .privacy {
+      font-size: .78rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── Profile view ── */
+    #profile-view { display: none; }
+
+    .welcome-tag {
+      display: inline-block;
+      background: #f0ebe0;
+      color: var(--gold);
+      font-size: .75rem;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+    }
+
+    .avatar-wrap {
+      position: relative;
+      width: 80px; height: 80px;
+      margin: 0 auto 20px;
+    }
+    .avatar-wrap img {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--white);
+      box-shadow: 0 4px 16px rgba(26,26,46,.16);
+    }
+    .avatar-badge {
+      position: absolute;
+      bottom: 0; right: 0;
+      width: 22px; height: 22px;
+      background: #34a853;
+      border-radius: 50%;
+      border: 2px solid var(--white);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .avatar-badge::after {
+      content: '';
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--white);
+    }
+
+    .user-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .user-email {
+      font-size: .875rem;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f9f6f0;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      font-size: .875rem;
+      color: var(--muted);
+    }
+    .info-row .icon { font-size: 1rem; }
+    .info-row strong { color: var(--ink); }
+
+    .sign-out-btn {
+      width: 100%;
+      margin-top: 20px;
+      padding: 13px 24px;
+      background: transparent;
+      color: var(--muted);
+      border: 1.5px solid #e5e0d8;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .sign-out-btn:hover {
+      border-color: #c9a84c;
+      color: var(--ink);
+      background: #faf8f3;
+    }
+
+    /* ── Animations ── */
+    .fade-in {
+      animation: fadeIn .5s ease both;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ── Loading spinner ── */
+    #loading-view { display: none; text-align: center; }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid #e5e0d8;
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { color: var(--muted); font-size: .9rem; }
+
+    /* ── Error message ── */
+    #error-msg {
+      display: none;
+      background: #fff3f3;
+      border: 1px solid #fcc;
+      color: #c00;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: .85rem;
+      margin-bottom: 16px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-circle bg-circle-1"></div>
+<div class="bg-circle bg-circle-2"></div>
+
+<div class="page">
+  <div class="card">
+
+    <!-- Loading -->
+    <div id="loading-view">
+      <div class="spinner"></div>
+      <p class="loading-text">Signing you in…</p>
+    </div>
+
+    <!-- Login -->
+    <div id="login-view">
+      <div class="logo-ring">✦</div>
+      <h1>Welcome back</h1>
+      <p class="subtitle">Sign in to continue to your account.<br>Quick, secure, and private.</p>
+
+      <div id="error-msg"></div>
+
+      <button class="google-btn" id="google-btn" onclick="handleSignIn()">
+        <!-- Google 'G' logo -->
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/>
+          <path d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 6.294C4.672 4.169 6.656 3.58 9 3.58z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div class="divider">secure sign-in</div>
+      <p class="privacy">Your data stays private. We only request your name and email from Google.</p>
+    </div>
+
+    <!-- Profile -->
+    <div id="profile-view">
+      <div style="text-align:center">
+        <div class="welcome-tag">✓ Authenticated</div>
+        <div class="avatar-wrap">
+          <img id="user-avatar" src="" alt="Avatar"/>
+          <div class="avatar-badge"></div>
+        </div>
+        <p class="user-name" id="user-name"></p>
+        <p class="user-email" id="user-email"></p>
+      </div>
+
+      <div class="info-row">
+        <span class="icon">🪪</span>
+        <span>Signed in via <strong>Google</strong></span>
+      </div>
+      <div class="info-row">
+        <span class="icon">🔒</span>
+        <span>Session is <strong>secure</strong></span>
+      </div>
+
+      <button class="sign-out-btn" onclick="handleSignOut()">Sign out</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<script>
+  // ─────────────────────────────────────────────
+  // REPLACE with your own Google OAuth Client ID
+  // ─────────────────────────────────────────────
+  const CLIENT_ID = '998534492664-52051203949k0ldmapomtkvbghdp31ji.apps.googleusercontent.com';
+
+  // ── UI helpers ──────────────────────────────
+  function show(id) { document.getElementById(id).style.display = ''; }
+  function hide(id) { document.getElementById(id).style.display = 'none'; }
+
+  function showError(msg) {
+    const el = document.getElementById('error-msg');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  // ── Sign-in ──────────────────────────────────
+  function handleSignIn() {
+    hide('login-view');
+    show('loading-view');
+
+    if (typeof google === 'undefined') {
+      show('login-view');
+      hide('loading-view');
+      showError('Google Sign-In failed to load. Check your Client ID and internet connection.');
+      return;
+    }
+
+    google.accounts.id.initialize({
+      client_id: CLIENT_ID,
+      callback: onSignIn,
+      auto_select: false,
+    });
+
+    google.accounts.id.prompt((notification) => {
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        // Fallback: render a popup button programmatically
+        const div = document.createElement('div');
+        div.id = 'g_id_temp';
+        div.style.display = 'none';
+        document.body.appendChild(div);
+
+        google.accounts.id.renderButton(div, {
+          type: 'standard',
+          theme: 'outline',
+          size: 'large',
+        });
+
+        // Simulate a click on the rendered button
+        setTimeout(() => {
+          const btn = div.querySelector('[role="button"]') || div.querySelector('button');
+          if (btn) btn.click();
+          else {
+            show('login-view');
+            hide('loading-view');
+            showError('Popup was blocked or dismissed. Please try again.');
+          }
+        }, 200);
+      }
+    });
+  }
+
+  // ── Callback after successful Google sign-in ──
+  function onSignIn(response) {
+    hide('loading-view');
+
+    // Decode the JWT credential
+    const payload = parseJwt(response.credential);
+
+    if (!payload) {
+      show('login-view');
+      showError('Could not read your Google profile. Please try again.');
+      return;
+    }
+
+    // Populate profile card
+    document.getElementById('user-name').textContent  = payload.name  || 'Unknown User';
+    document.getElementById('user-email').textContent = payload.email || '';
+    document.getElementById('user-avatar').src        = payload.picture || '';
+
+    // Animate in profile view
+    const pv = document.getElementById('profile-view');
+    pv.style.display = '';
+    pv.classList.add('fade-in');
+  }
+
+  // ── Sign-out ─────────────────────────────────
+  function handleSignOut() {
+    if (typeof google !== 'undefined') {
+      google.accounts.id.disableAutoSelect();
+    }
+
+    hide('profile-view');
+
+    // Reset & show login
+    document.getElementById('error-msg').style.display = 'none';
+    const lv = document.getElementById('login-view');
+    lv.style.display = '';
+    lv.classList.add('fade-in');
+  }
+
+  // ── JWT decoder (no library needed) ─────────
+  function parseJwt(token) {
+    try {
+      const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const json = decodeURIComponent(
+        atob(base64).split('').map(c =>
+          '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+        ).join('')
+      );
+      return JSON.parse(json);
+    } catch (e) {
+      return null;
+    }
+  }
+</script>
+</body>
+</html>
